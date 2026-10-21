@@ -41,3 +41,26 @@ media-stack/prowlarr/Backups/
 media-stack/prowlarr/Definitions/
 media-stack/prowlarr/asp/
 media-stack/prowlarr/Sentry/
+
+## Radarr
+media-stack/radarr/*.db
+media-stack/radarr/*.db-wal
+media-stack/radarr/*.db-shm
+media-stack/radarr/*.pid
+media-stack/radarr/logs/
+media-stack/radarr/Backups/
+media-stack/radarr/MediaCover/
+media-stack/radarr/asp/
+media-stack/radarr/Sentry/
+
+## Sonarr
+media-stack/sonarr/*.db
+media-stack/sonarr/*.db-wal
+media-stack/sonarr/*.db-shm
+media-stack/sonarr/*.pid
+media-stack/sonarr/logs/
+media-stack/sonarr/Backups/
+media-stack/sonarr/MediaCover/
+media-stack/sonarr/asp/
+media-stack/sonarr/Sentry/
+
