@@ -1,0 +1,24 @@
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "8080:80/tcp"  # This forces your Windows PC to use port 8080
+    environment:
+      TZ: 'America/Chicago'
+      FTLCONF_webserver_api_password: 'd3athStar'  # Modern v6 password variable
+      FTLCONF_dns_listeningMode: 'ALL'                         # Helps bridge the Docker network
+    volumes:
+      - './etc-pihole:/etc/pihole'
+      - './etc-dnsmasq.d:/etc/dnsmasq.d'
+    restart: unless-stopped
+    networks:
+      - default
+      - caddy_net
+
+networks:
+  caddy_net:
+    external: true # let docker know "hey this network exists dont create it"
+
