@@ -20,3 +20,24 @@ media-stack/jellyfin/.jellyfin-data
 media-stack/ombi/*.db
 media-stack/ombi/Logs/
 media-stack/ombi/.aspnet/
+
+## Portainer
+media-stack/portainer/portainer.db
+media-stack/portainer/portainer.key
+media-stack/portainer/portainer.pub
+media-stack/portainer/chisel/
+media-stack/portainer/certs/
+media-stack/portainer/bin/
+media-stack/portainer/compose/
+media-stack/portainer/tls/
+
+## Prowlarr
+media-stack/prowlarr/*.db
+media-stack/prowlarr/*.db-wal
+media-stack/prowlarr/*.db-shm
+media-stack/prowlarr/*.pid
+media-stack/prowlarr/logs/
+media-stack/prowlarr/Backups/
+media-stack/prowlarr/Definitions/
+media-stack/prowlarr/asp/
+media-stack/prowlarr/Sentry/
