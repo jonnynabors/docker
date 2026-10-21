@@ -1,0 +1,35 @@
+{
+    local_certs
+}
+
+pihole.home.arpa {
+    reverse_proxy pihole:80
+}
+
+jellyfin.home.arpa {
+    reverse_proxy gluetun:8096
+}
+
+torrent.home.arpa {
+    reverse_proxy gluetun:8112
+}
+
+radarr.home.arpa {
+    reverse_proxy gluetun:7878
+}
+
+sonarr.home.arpa {
+    reverse_proxy gluetun:8989
+}
+
+prowlarr.home.arpa {
+    reverse_proxy gluetun:9696
+}
+
+ombi.home.arpa {
+    reverse_proxy ombi:3579
+}
+
+portainer.home.arpa {
+    reverse_proxy portainer:9000
+}
