@@ -7,6 +7,7 @@ pihole/etc-pihole/
 pihole/etc-dnsmasq.d/
 
 # --- Media Stack Directories ---
+## Jellyfin
 media-stack/jellyfin/config/
 media-stack/jellyfin/data/
 media-stack/jellyfin/log/
@@ -15,3 +16,7 @@ media-stack/jellyfin/plugins/
 media-stack/jellyfin/root/
 media-stack/jellyfin/.jellyfin-data
 
+## Ombi
+media-stack/ombi/*.db
+media-stack/ombi/Logs/
+media-stack/ombi/.aspnet/
