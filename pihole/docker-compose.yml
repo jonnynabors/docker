@@ -8,7 +8,7 @@ services:
       - "8080:80/tcp"  # This forces your Windows PC to use port 8080
     environment:
       TZ: 'America/Chicago'
-      FTLCONF_webserver_api_password: 'd3athStar'  # Modern v6 password variable
+      FTLCONF_webserver_api_password: '${PIHOLE_PASSWORD:?set in .env}'  # Modern v6 password variable
       FTLCONF_dns_listeningMode: 'ALL'                         # Helps bridge the Docker network
     volumes:
       - './etc-pihole:/etc/pihole'

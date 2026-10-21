@@ -1,3 +1,6 @@
+# --- Secrets ---
+.env
+
 # --- Caddy Directory ---
 caddy/caddy_config/
 caddy/caddy_data/

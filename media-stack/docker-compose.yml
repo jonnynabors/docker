@@ -17,8 +17,8 @@ services:
     environment:
       - VPN_SERVICE_PROVIDER=mullvad
       - VPN_TYPE=wireguard
-      - WIREGUARD_PRIVATE_KEY=wMQj+VW8O1s2SRcnftKavqXyY3O8mRe9F0tzxvWESEQ=
-      - WIREGUARD_ADDRESSES=10.65.195.206/32
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY:?set in .env}
+      - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES:?set in .env}
       - SERVER_COUNTRIES=USA         # Routes you only through US nodes for local latency
       - SERVER_CITIES=Dallas TX
       - TZ=America/Chicago
