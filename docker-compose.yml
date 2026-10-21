@@ -1,5 +1,8 @@
 name: homelab
 
+x-common: &common
+  restart: unless-stopped
+
 x-lsio-env: &lsio-env
   PUID: "1000"
   PGID: "1000"
@@ -7,16 +10,17 @@ x-lsio-env: &lsio-env
 
 # Joins gluetun's network namespace; restarts with it so the shared network never goes stale.
 x-via-gluetun: &via-gluetun
+  <<: *common
   network_mode: service:gluetun
   depends_on:
     gluetun:
       condition: service_healthy
       restart: true
-  restart: unless-stopped
 
 services:
   # --- DNS + reverse proxy ---
   pihole:
+    <<: *common
     image: pihole/pihole:latest
     container_name: pihole
     ports:
@@ -30,9 +34,9 @@ services:
     volumes:
       - ./pihole/etc-pihole:/etc/pihole
       - ./pihole/etc-dnsmasq.d:/etc/dnsmasq.d
-    restart: unless-stopped
 
   caddy:
+    <<: *common
     image: caddy:latest
     container_name: caddy
     ports:
@@ -42,10 +46,10 @@ services:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile
       - ./caddy/caddy_data:/data
       - ./caddy/caddy_config:/config
-    restart: unless-stopped
 
   # --- VPN gateway: everything below with network_mode service:gluetun goes through Mullvad ---
   gluetun:
+    <<: *common
     image: qmcgaw/gluetun:latest
     container_name: gluetun
     cap_add:
@@ -69,7 +73,6 @@ services:
       DNS_ADDRESS: 127.0.0.11
       FIREWALL_OUTBOUND_SUBNETS: 172.16.0.0/12,192.168.68.0/24
       BLOCK_MALICIOUS: "off"
-    restart: unless-stopped
 
   qbittorrent:
     <<: *via-gluetun
@@ -141,6 +144,7 @@ services:
 
   # --- Outside the VPN ---
   ombi:
+    <<: *common
     image: lscr.io/linuxserver/ombi:latest
     container_name: ombi
     environment: *lsio-env
@@ -148,9 +152,9 @@ services:
       - ./media-stack/ombi:/config
     ports:
       - "3579:3579"
-    restart: unless-stopped
 
   portainer:
+    <<: *common
     image: portainer/portainer-ce:latest
     container_name: portainer
     environment:
@@ -160,4 +164,3 @@ services:
       - ./media-stack/portainer:/data
     ports:
       - "9000:9000"
-    restart: unless-stopped
