@@ -1,74 +1,9 @@
-# --- Secrets ---
+# Secrets
 .env
 
-# --- Caddy Directory ---
-caddy/caddy_config/
-caddy/caddy_data/
-
-# --- PiHole Directory ---
+# Runtime state: app configs, databases, certificates
+media-stack/
 pihole/etc-pihole/
 pihole/etc-dnsmasq.d/
-
-# --- Media Stack Directories ---
-## Jellyfin
-media-stack/jellyfin/config/
-media-stack/jellyfin/data/
-media-stack/jellyfin/log/
-media-stack/jellyfin/metadata/
-media-stack/jellyfin/plugins/
-media-stack/jellyfin/root/
-media-stack/jellyfin/.jellyfin-data
-
-## Ombi
-media-stack/ombi/*.db
-media-stack/ombi/Logs/
-media-stack/ombi/.aspnet/
-
-## Portainer
-media-stack/portainer/portainer.db
-media-stack/portainer/portainer.key
-media-stack/portainer/portainer.pub
-media-stack/portainer/chisel/
-media-stack/portainer/certs/
-media-stack/portainer/bin/
-media-stack/portainer/compose/
-media-stack/portainer/tls/
-
-## Prowlarr
-media-stack/prowlarr/*.db
-media-stack/prowlarr/*.db-wal
-media-stack/prowlarr/*.db-shm
-media-stack/prowlarr/*.pid
-media-stack/prowlarr/logs/
-media-stack/prowlarr/Backups/
-media-stack/prowlarr/Definitions/
-media-stack/prowlarr/asp/
-media-stack/prowlarr/Sentry/
-
-## Radarr
-media-stack/radarr/*.db
-media-stack/radarr/*.db-wal
-media-stack/radarr/*.db-shm
-media-stack/radarr/*.pid
-media-stack/radarr/logs/
-media-stack/radarr/Backups/
-media-stack/radarr/MediaCover/
-media-stack/radarr/asp/
-media-stack/radarr/Sentry/
-
-## Sonarr
-media-stack/sonarr/*.db
-media-stack/sonarr/*.db-wal
-media-stack/sonarr/*.db-shm
-media-stack/sonarr/*.pid
-media-stack/sonarr/logs/
-media-stack/sonarr/Backups/
-media-stack/sonarr/MediaCover/
-media-stack/sonarr/asp/
-media-stack/sonarr/Sentry/
-
-## Torrent Configs
-media-stack/torrent/.cache/
-media-stack/torrent/qBittorrent/BT_backup/
-media-stack/torrent/qBittorrent/logs/
-media-stack/torrent/qBittorrent/GeoIP/
+caddy/caddy_data/
+caddy/caddy_config/
