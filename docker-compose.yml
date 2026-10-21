@@ -1,0 +1,163 @@
+name: homelab
+
+x-lsio-env: &lsio-env
+  PUID: "1000"
+  PGID: "1000"
+  TZ: America/Chicago
+
+# Joins gluetun's network namespace; restarts with it so the shared network never goes stale.
+x-via-gluetun: &via-gluetun
+  network_mode: service:gluetun
+  depends_on:
+    gluetun:
+      condition: service_healthy
+      restart: true
+  restart: unless-stopped
+
+services:
+  # --- DNS + reverse proxy ---
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "8080:80/tcp"
+    environment:
+      TZ: America/Chicago
+      FTLCONF_webserver_api_password: ${PIHOLE_PASSWORD:?set in .env}
+      FTLCONF_dns_listeningMode: ALL
+    volumes:
+      - ./pihole/etc-pihole:/etc/pihole
+      - ./pihole/etc-dnsmasq.d:/etc/dnsmasq.d
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy/caddy_data:/data
+      - ./caddy/caddy_config:/config
+    restart: unless-stopped
+
+  # --- VPN gateway: everything below with network_mode service:gluetun goes through Mullvad ---
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - "8096:8096"  # Jellyfin
+      - "8112:8112"  # qBittorrent
+      - "7878:7878"  # Radarr
+      - "8989:8989"  # Sonarr
+      - "9696:9696"  # Prowlarr
+    environment:
+      TZ: America/Chicago
+      VPN_SERVICE_PROVIDER: mullvad
+      VPN_TYPE: wireguard
+      WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY:?set in .env}
+      WIREGUARD_ADDRESSES: ${WIREGUARD_ADDRESSES:?set in .env}
+      SERVER_COUNTRIES: USA
+      SERVER_CITIES: Dallas TX
+      DNS_ADDRESS: 127.0.0.11
+      FIREWALL_OUTBOUND_SUBNETS: 172.16.0.0/12,192.168.68.0/24
+      BLOCK_MALICIOUS: "off"
+    restart: unless-stopped
+
+  qbittorrent:
+    <<: *via-gluetun
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      <<: *lsio-env
+      WEBUI_PORT: "8112"
+    volumes:
+      - ./media-stack/torrent:/config
+      - ${MEDIA_ROOT:-/mnt/storage}/downloads:/downloads
+
+  prowlarr:
+    <<: *via-gluetun
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment: *lsio-env
+    volumes:
+      - ./media-stack/prowlarr:/config
+
+  radarr:
+    <<: *via-gluetun
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment: *lsio-env
+    volumes:
+      - ./media-stack/radarr:/config
+      - ${MEDIA_ROOT:-/mnt/storage}:/media
+      - ${MEDIA_ROOT:-/mnt/storage}/downloads:/downloads
+
+  sonarr:
+    <<: *via-gluetun
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment: *lsio-env
+    volumes:
+      - ./media-stack/sonarr:/config
+      - ${MEDIA_ROOT:-/mnt/storage}:/media
+      - ${MEDIA_ROOT:-/mnt/storage}/downloads:/downloads
+
+  jellyfin:
+    <<: *via-gluetun
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    environment: *lsio-env
+    volumes:
+      - ./media-stack/jellyfin:/config
+      - ${MEDIA_ROOT:-/mnt/storage}:/media
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  watchtower:
+    <<: *via-gluetun
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    user: "0"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      TZ: America/Chicago
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_POLL_INTERVAL: "86400"
+      DOCKER_API_VERSION: "1.43"
+
+  # --- Outside the VPN ---
+  ombi:
+    image: lscr.io/linuxserver/ombi:latest
+    container_name: ombi
+    environment: *lsio-env
+    volumes:
+      - ./media-stack/ombi:/config
+    ports:
+      - "3579:3579"
+    restart: unless-stopped
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    environment:
+      TZ: America/Chicago
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./media-stack/portainer:/data
+    ports:
+      - "9000:9000"
+    restart: unless-stopped
