@@ -64,3 +64,8 @@ media-stack/sonarr/MediaCover/
 media-stack/sonarr/asp/
 media-stack/sonarr/Sentry/
 
+## Torrent Configs
+torrent/.cache/
+torrent/qBittorrent/BT_backup/
+torrent/qBittorrent/logs/
+torrent/qBittorrent/GeoIP/
