@@ -1,3 +1,7 @@
 # --- Caddy Directory ---
 caddy/caddy_config/
 caddy/caddy_data/
+
+# --- PiHole Directory ---
+pihole/etc-pihole/
+pihole/etc-dnsmasq.d/
