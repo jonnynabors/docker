@@ -1,0 +1,156 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    # Running under the host network layer allows the VPN tunnel to initialize cleanly
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - "8096:8096"  # Jellyfin Web UI access port
+      - "8112:8112"  # qBittorrent Web UI (Protected inside the VPN)
+      - "7878:7878"  # Radarr Web UI
+      - "8989:8989"  # Sonarr Web UI
+      - "9696:9696"  # Prowlarr Web UI
+      # - "5055:5055"  # Overseerr Web UI
+    environment:
+      - VPN_SERVICE_PROVIDER=mullvad
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=wMQj+VW8O1s2SRcnftKavqXyY3O8mRe9F0tzxvWESEQ=
+      - WIREGUARD_ADDRESSES=10.65.195.206/32
+      - SERVER_COUNTRIES=USA         # Routes you only through US nodes for local latency
+      - SERVER_CITIES=Dallas TX
+      - TZ=America/Chicago
+      - DNS_ADDRESS=127.0.0.11 # Forces Gluetun to use Docker's DNS so apps can see each other
+      - FIREWALL_OUTBOUND_SUBNETS=172.16.0.0/12,192.168.68.0/24,172.20.0.0/16
+      - BLOCK_MALICIOUS=off                                    # Disables Gluetun's built-in aggressive DNS blocklist
+    restart: unless-stopped
+    networks:
+      - default
+      - caddy_net # connect to caddy's network for routing bridge
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    network_mode: "container:gluetun" # Forces all download traffic through the VPN
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+      - WEBUI_PORT=8112
+    volumes:
+      - ./torrent:/config
+      - /mnt/storage/downloads:/downloads # Where in-progress files go
+    restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    network_mode: "container:gluetun" # Protects your indexer site searches
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+    volumes:
+      - ./prowlarr:/config
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    network_mode: "container:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+    volumes:
+      - ./radarr:/config
+      - /mnt/storage:/media
+      - /mnt/storage/downloads:/downloads
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    network_mode: "container:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+    volumes:
+      - ./sonarr:/config
+      - /mnt/storage:/media
+      - /mnt/storage/downloads:/downloads
+    restart: unless-stopped
+
+  # --- STREAMING LAYER (WITH RTX 2070 UNLOCKED) ---
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    network_mode: "container:gluetun" # Keeps network ports mapped easily
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+    volumes:
+      - ./jellyfin:/config
+      - /mnt/storage:/media
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu] # This passes your RTX 2070 into Jellyfin!
+    restart: unless-stopped
+
+  ombi:
+    image: lscr.io/linuxserver/ombi:latest
+    container_name: ombi
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+    volumes:
+      - ./ombi:/config
+    ports:
+      - "3579:3579"  # Ombi Web UI access port
+    restart: unless-stopped
+    networks:
+      - default
+      - caddy_net
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    command: -H unix:///var/run/docker.sock
+    environment:
+      - TZ=America/Chicago
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Links Portainer to your Ubuntu Docker engine
+      - ./portainer:/data                         # Stores your Portainer admin settings
+    ports:
+      - "9000:9000"                               # Portainer Web UI access port
+    restart: unless-stopped
+    networks:
+      - default
+      - caddy_net
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    network_mode: "container:gluetun"
+    user: "0"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Allows Watchtower to monitor container versions
+    environment:
+      - TZ=America/Chicago
+      - WATCHTOWER_CLEANUP=true                   # Deletes old duplicate images to save hard drive space
+      - WATCHTOWER_POLL_INTERVAL=86400            # Checks for software updates once every 24 hours (in seconds)
+      - DOCKER_API_VERSION=1.43
+    restart: unless-stopped
+
+networks:
+  caddy_net:
+    external: true

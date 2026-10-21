@@ -5,3 +5,13 @@ caddy/caddy_data/
 # --- PiHole Directory ---
 pihole/etc-pihole/
 pihole/etc-dnsmasq.d/
+
+# --- Media Stack Directories ---
+media-stack/jellyfin/config/
+media-stack/jellyfin/data/
+media-stack/jellyfin/log/
+media-stack/jellyfin/metadata/
+media-stack/jellyfin/plugins/
+media-stack/jellyfin/root/
+media-stack/jellyfin/.jellyfin-data
+
