@@ -21,7 +21,7 @@ services:
   # --- DNS + reverse proxy ---
   pihole:
     <<: *common
-    image: pihole/pihole:latest
+    image: pihole/pihole:2026.10.0
     container_name: pihole
     ports:
       - "53:53/tcp"
@@ -37,7 +37,7 @@ services:
 
   caddy:
     <<: *common
-    image: caddy:latest
+    image: caddy:2.11.7
     container_name: caddy
     ports:
       - "80:80"
@@ -50,7 +50,7 @@ services:
   # --- VPN gateway: everything below with network_mode service:gluetun goes through Mullvad ---
   gluetun:
     <<: *common
-    image: qmcgaw/gluetun:latest
+    image: qmcgaw/gluetun:latest@sha256:c2ee4191762fca6b6a3c3359a731198a95d9c9af4db32d466e223bf3a84e779b
     container_name: gluetun
     cap_add:
       - NET_ADMIN
@@ -76,7 +76,7 @@ services:
 
   qbittorrent:
     <<: *via-gluetun
-    image: lscr.io/linuxserver/qbittorrent:latest
+    image: lscr.io/linuxserver/qbittorrent:5.3.0
     container_name: qbittorrent
     environment:
       <<: *lsio-env
@@ -87,7 +87,7 @@ services:
 
   prowlarr:
     <<: *via-gluetun
-    image: lscr.io/linuxserver/prowlarr:latest
+    image: lscr.io/linuxserver/prowlarr:2.6.5
     container_name: prowlarr
     environment: *lsio-env
     volumes:
@@ -95,7 +95,7 @@ services:
 
   radarr:
     <<: *via-gluetun
-    image: lscr.io/linuxserver/radarr:latest
+    image: lscr.io/linuxserver/radarr:6.4.4
     container_name: radarr
     environment: *lsio-env
     volumes:
@@ -105,7 +105,7 @@ services:
 
   sonarr:
     <<: *via-gluetun
-    image: lscr.io/linuxserver/sonarr:latest
+    image: lscr.io/linuxserver/sonarr:4.0.20
     container_name: sonarr
     environment: *lsio-env
     volumes:
@@ -115,7 +115,7 @@ services:
 
   jellyfin:
     <<: *via-gluetun
-    image: jellyfin/jellyfin:latest
+    image: jellyfin/jellyfin:12.2
     container_name: jellyfin
     environment: *lsio-env
     volumes:
@@ -145,7 +145,7 @@ services:
   # --- Outside the VPN ---
   ombi:
     <<: *common
-    image: lscr.io/linuxserver/ombi:latest
+    image: lscr.io/linuxserver/ombi:4.53.10
     container_name: ombi
     environment: *lsio-env
     volumes:
@@ -155,7 +155,7 @@ services:
 
   portainer:
     <<: *common
-    image: portainer/portainer-ce:latest
+    image: portainer/portainer-ce:2.45.2
     container_name: portainer
     environment:
       TZ: America/Chicago

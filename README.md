@@ -85,8 +85,24 @@ Requires Docker Compose 2.17 or newer.
 | `media-stack/`, `pihole/etc-*`, `caddy/caddy_*` | Runtime state, git-ignored                        |
 | `.env`                                          | Secrets, git-ignored                              |
 
+## Verifying the VPN
+
+Gluetun adds an iptables kill switch: its `OUTPUT` policy is `DROP`, and it only allows the Docker and LAN subnets (`FIREWALL_OUTBOUND_SUBNETS`), the Mullvad endpoint, and `tun0`. Containers using `network_mode: service:gluetun` share that namespace, so if the tunnel drops their traffic is blocked, not sent out over the normal connection.
+
+To check it from the Docker host:
+
+```sh
+curl -s https://am.i.mullvad.net/ip                                  # host's real IP
+docker exec qbittorrent wget -qO- https://am.i.mullvad.net/json      # should show mullvad_exit_ip: true
+docker exec gluetun iptables -S OUTPUT                               # policy DROP, no rule for eth0 to the internet
+docker logs gluetun 2>&1 | grep -E 'Public IP|leak check'
+```
+
+The two IPs must differ. DNS inside the namespace goes through gluetun's own resolver, and its upstream queries leave through the tunnel.
+
 ## Notes
 
 - Caddy uses its internal CA; trust its root certificate (`caddy/caddy_data/caddy/pki/authorities/local/root.crt`) on clients to avoid browser warnings.
 - Jellyfin reserves an Nvidia GPU; remove its `deploy` block on a host without one.
-- Watchtower updates all images daily, and most are on `latest`.
+- Image versions are pinned in `docker-compose.yml` and bumped by Renovate merge requests (`renovate.json`). Gluetun is pinned by digest because the deployed build is newer than the latest release tag.
+- Watchtower still runs until Renovate is active; remove it afterwards.

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "enabledManagers": ["docker-compose"],
+  "timezone": "America/Chicago",
+  "schedule": ["before 6am on saturday"],
+  "packageRules": [
+    {
+      "description": "Weekly batch of minor and patch updates",
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "groupName": "homelab minor and patch"
+    },
+    {
+      "description": "Major updates get their own merge request",
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Gluetun is deployed from latest, so track its digest",
+      "matchPackageNames": ["qmcgaw/gluetun"],
+      "pinDigests": true,
+      "groupName": "gluetun"
+    }
+  ]
+}
