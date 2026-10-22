@@ -129,19 +129,6 @@ services:
               count: 1
               capabilities: [gpu]
 
-  watchtower:
-    <<: *via-gluetun
-    image: containrrr/watchtower:latest
-    container_name: watchtower
-    user: "0"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      TZ: America/Chicago
-      WATCHTOWER_CLEANUP: "true"
-      WATCHTOWER_POLL_INTERVAL: "86400"
-      DOCKER_API_VERSION: "1.43"
-
   # --- Outside the VPN ---
   ombi:
     <<: *common
@@ -152,6 +139,20 @@ services:
       - ./media-stack/ombi:/config
     ports:
       - "3579:3579"
+
+  # Runs as uid 1000, so media-stack/seerr must be owned by 1000:1000
+  seerr:
+    <<: *common
+    image: ghcr.io/seerr-team/seerr:v3.5.1
+    container_name: seerr
+    init: true
+    environment:
+      TZ: America/Chicago
+      PORT: "5055"
+    volumes:
+      - ./media-stack/seerr:/app/config
+    ports:
+      - "5055:5055"
 
   portainer:
     <<: *common

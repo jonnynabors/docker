@@ -13,6 +13,7 @@ flowchart LR
         pihole[Pi-hole<br/>DNS :53, UI :8080]
         caddy[Caddy<br/>:80 / :443]
         ombi[Ombi :3579]
+        seerr[Seerr :5055]
         portainer[Portainer :9000]
 
         subgraph vpn[gluetun network namespace]
@@ -22,7 +23,6 @@ flowchart LR
             radarr[Radarr :7878]
             sonarr[Sonarr :8989]
             prowlarr[Prowlarr :9696]
-            watchtower[Watchtower]
         end
     end
 
@@ -30,6 +30,7 @@ flowchart LR
     LAN -- "*.home.arpa" --> caddy
     caddy --> pihole
     caddy --> ombi
+    caddy --> seerr
     caddy --> portainer
     caddy -- via gluetun ports --> jellyfin & qbit & radarr & sonarr & prowlarr
     gluetun == tunnel ==> Mullvad
@@ -46,8 +47,8 @@ flowchart LR
 | Sonarr      | `sonarr.home.arpa`           | yes        |
 | Prowlarr    | `prowlarr.home.arpa`         | yes        |
 | Ombi        | `ombi.home.arpa`             | no         |
+| Seerr       | `seerr.home.arpa`            | no         |
 | Portainer   | `portainer.home.arpa`        | no         |
-| Watchtower  | (none)                       | yes        |
 
 Services behind the VPN use `network_mode: service:gluetun`, so their ports are published on `gluetun`. They restart with it (`depends_on` with `restart: true`).
 
@@ -104,5 +105,4 @@ The two IPs must differ. DNS inside the namespace goes through gluetun's own res
 
 - Caddy uses its internal CA; trust its root certificate (`caddy/caddy_data/caddy/pki/authorities/local/root.crt`) on clients to avoid browser warnings.
 - Jellyfin reserves an Nvidia GPU; remove its `deploy` block on a host without one.
-- Image versions are pinned in `docker-compose.yml` and bumped by Renovate merge requests (`renovate.json`). Gluetun is pinned by digest because the deployed build is newer than the latest release tag.
-- Watchtower still runs until Renovate is active; remove it afterwards.
+- Image versions are pinned in `docker-compose.yml` and bumped by Renovate pull requests (`renovate.json`). Gluetun is pinned by digest because the deployed build is newer than the latest release tag.

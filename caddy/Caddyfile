@@ -30,6 +30,10 @@ ombi.home.arpa {
     reverse_proxy ombi:3579
 }
 
+seerr.home.arpa {
+    reverse_proxy seerr:5055
+}
+
 portainer.home.arpa {
     reverse_proxy portainer:9000
 }
