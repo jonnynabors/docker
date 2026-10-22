@@ -16,9 +16,9 @@
       "dependencyDashboardApproval": true
     },
     {
-      "description": "Ignore linuxserver's Ubuntu base-image tags like 20.04.1",
+      "description": "qBittorrent is 5.x; the image also has unrelated tags like 14.3.9 and 20.04.1",
       "matchPackageNames": ["lscr.io/linuxserver/qbittorrent"],
-      "allowedVersions": "!/^\\d{2}\\.\\d{2}(\\.\\d+)?$/"
+      "allowedVersions": "/^\\d\\.\\d+\\.\\d+$/"
     },
     {
       "description": "Gluetun is deployed from latest, so track its digest",

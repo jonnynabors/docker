@@ -26,8 +26,8 @@ prowlarr.home.arpa {
     reverse_proxy gluetun:9696
 }
 
-ombi.home.arpa {
-    reverse_proxy ombi:3579
+bazarr.home.arpa {
+    reverse_proxy gluetun:6767
 }
 
 seerr.home.arpa {

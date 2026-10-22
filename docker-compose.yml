@@ -62,6 +62,7 @@ services:
       - "7878:7878"  # Radarr
       - "8989:8989"  # Sonarr
       - "9696:9696"  # Prowlarr
+      - "6767:6767"  # Bazarr
     environment:
       TZ: America/Chicago
       VPN_SERVICE_PROVIDER: mullvad
@@ -129,17 +130,16 @@ services:
               count: 1
               capabilities: [gpu]
 
-  # --- Outside the VPN ---
-  ombi:
-    <<: *common
-    image: lscr.io/linuxserver/ombi:4.53.10
-    container_name: ombi
+  bazarr:
+    <<: *via-gluetun
+    image: lscr.io/linuxserver/bazarr:1.6.2
+    container_name: bazarr
     environment: *lsio-env
     volumes:
-      - ./media-stack/ombi:/config
-    ports:
-      - "3579:3579"
+      - ./media-stack/bazarr:/config
+      - ${MEDIA_ROOT:-/mnt/storage}:/media
 
+  # --- Outside the VPN ---
   # Runs as uid 1000, so media-stack/seerr must be owned by 1000:1000
   seerr:
     <<: *common

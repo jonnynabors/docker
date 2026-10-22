@@ -28,11 +28,6 @@ Caddy uses its internal CA (`local_certs`), so each device must trust the root o
 - SSO with Authelia (or Authentik) in front of the *arr UIs, with OIDC for apps that support it. Depends on the certificate decision above.
 - Put Portainer behind `tecnativa/docker-socket-proxy`.
 
-## Media stack
-
-- Retire Ombi once Seerr (the merged Jellyseerr/Overseerr successor) is validated.
-- Add Bazarr for automatic subtitles (runs behind gluetun, port 6767).
-
 ## Self-hosted replacements
 
 - Vaultwarden (passwords), which requires trusted HTTPS.

@@ -12,7 +12,6 @@ flowchart LR
     subgraph host[Docker host]
         pihole[Pi-hole<br/>DNS :53, UI :8080]
         caddy[Caddy<br/>:80 / :443]
-        ombi[Ombi :3579]
         seerr[Seerr :5055]
         portainer[Portainer :9000]
 
@@ -23,16 +22,16 @@ flowchart LR
             radarr[Radarr :7878]
             sonarr[Sonarr :8989]
             prowlarr[Prowlarr :9696]
+            bazarr[Bazarr :6767]
         end
     end
 
     LAN -- DNS --> pihole
     LAN -- "*.home.arpa" --> caddy
     caddy --> pihole
-    caddy --> ombi
     caddy --> seerr
     caddy --> portainer
-    caddy -- via gluetun ports --> jellyfin & qbit & radarr & sonarr & prowlarr
+    caddy -- via gluetun ports --> jellyfin & qbit & radarr & sonarr & prowlarr & bazarr
     gluetun == tunnel ==> Mullvad
 ```
 
@@ -46,7 +45,7 @@ flowchart LR
 | Radarr      | `radarr.home.arpa`           | yes        |
 | Sonarr      | `sonarr.home.arpa`           | yes        |
 | Prowlarr    | `prowlarr.home.arpa`         | yes        |
-| Ombi        | `ombi.home.arpa`             | no         |
+| Bazarr      | `bazarr.home.arpa`           | yes        |
 | Seerr       | `seerr.home.arpa`            | no         |
 | Portainer   | `portainer.home.arpa`        | no         |
 
