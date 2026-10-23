@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
-  "enabledManagers": ["docker-compose"],
+  "enabledManagers": ["docker-compose", "dockerfile"],
   "timezone": "America/Chicago",
   "schedule": ["before 6am on saturday"],
   "packageRules": [

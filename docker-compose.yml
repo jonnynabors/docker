@@ -37,8 +37,11 @@ services:
 
   caddy:
     <<: *common
-    image: caddy:2.11.7
+    build: ./caddy
+    image: homelab/caddy-cloudflare:2.11.7
     container_name: caddy
+    environment:
+      CF_API_TOKEN: ${CF_API_TOKEN:?set in .env}
     ports:
       - "80:80"
       - "443:443"
@@ -153,6 +156,18 @@ services:
       - ./media-stack/seerr:/app/config
     ports:
       - "5055:5055"
+
+  vaultwarden:
+    <<: *common
+    image: vaultwarden/server:1.37.4
+    container_name: vaultwarden
+    environment:
+      TZ: America/Chicago
+      DOMAIN: https://vault.rackcellar.com
+      # Set true in .env only long enough to create your account
+      SIGNUPS_ALLOWED: ${VAULTWARDEN_SIGNUPS_ALLOWED:-false}
+    volumes:
+      - ./vaultwarden/data:/data
 
   portainer:
     <<: *common

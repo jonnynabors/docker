@@ -7,3 +7,4 @@ pihole/etc-pihole/
 pihole/etc-dnsmasq.d/
 caddy/caddy_data/
 caddy/caddy_config/
+vaultwarden/

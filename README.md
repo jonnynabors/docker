@@ -85,6 +85,18 @@ Requires Docker Compose 2.17 or newer.
 | `media-stack/`, `pihole/etc-*`, `caddy/caddy_*` | Runtime state, git-ignored                        |
 | `.env`                                          | Secrets, git-ignored                              |
 
+## Vaultwarden
+
+`vault.rackcellar.com` is served by Caddy with a real Let's Encrypt cert (DNS-01 via Cloudflare), so no CA trust is needed on clients. The name has no public DNS record; it only resolves through Pi-hole.
+
+1. Create a Cloudflare API token (`Zone:DNS:Edit`, scoped to `rackcellar.com`) and set `CF_API_TOKEN` in `.env`.
+2. Add a Pi-hole local DNS record: `vault.rackcellar.com` -> host LAN IP.
+3. Build and start: `docker compose up -d --build caddy vaultwarden`.
+4. Set `VAULTWARDEN_SIGNUPS_ALLOWED=true`, recreate `vaultwarden`, create your account, then remove it and recreate again.
+5. Away from home: on the host run `tailscale up --advertise-routes=192.168.68.0/24`, approve the route in the Tailscale admin console, and add Pi-hole as a Tailscale DNS nameserver restricted (split DNS) to `rackcellar.com`.
+
+Back up `vaultwarden/data` (SQLite; use `sqlite3 db.sqlite3 ".backup <dest>"`, not a plain copy) to a second disk and offsite.
+
 ## Verifying the VPN
 
 Gluetun adds an iptables kill switch: its `OUTPUT` policy is `DROP`, and it only allows the Docker and LAN subnets (`FIREWALL_OUTBOUND_SUBNETS`), the Mullvad endpoint, and `tun0`. Containers using `network_mode: service:gluetun` share that namespace, so if the tunnel drops their traffic is blocked, not sent out over the normal connection.

@@ -37,3 +37,12 @@ seerr.home.arpa {
 portainer.home.arpa {
     reverse_proxy portainer:9000
 }
+
+# Real Let's Encrypt cert via DNS-01; overrides the global local_certs.
+vault.rackcellar.com {
+    tls {
+        dns cloudflare {env.CF_API_TOKEN}
+        resolvers 1.1.1.1
+    }
+    reverse_proxy vaultwarden:80
+}
