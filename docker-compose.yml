@@ -169,6 +169,27 @@ services:
     volumes:
       - ./vaultwarden/data:/data
 
+  # Daily consistent SQLite snapshot, 30 days retained. Needs rw on /data for WAL.
+  vaultwarden-backup:
+    <<: *common
+    image: alpine:3.22
+    container_name: vaultwarden-backup
+    depends_on:
+      - vaultwarden
+    entrypoint:
+      - sh
+      - -c
+      - |
+        apk add --no-cache sqlite >/dev/null
+        while true; do
+          sqlite3 /data/db.sqlite3 ".backup '/backups/db-$$(date +%F).sqlite3'"
+          find /backups -name 'db-*.sqlite3' -mtime +30 -delete
+          sleep 86400
+        done
+    volumes:
+      - ./vaultwarden/data:/data
+      - ${VAULTWARDEN_BACKUP_DIR:-./vaultwarden/backups}:/backups
+
   portainer:
     <<: *common
     image: portainer/portainer-ce:2.45.2

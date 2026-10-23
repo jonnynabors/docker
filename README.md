@@ -95,7 +95,7 @@ Requires Docker Compose 2.17 or newer.
 4. Set `VAULTWARDEN_SIGNUPS_ALLOWED=true`, recreate `vaultwarden`, create your account, then remove it and recreate again.
 5. Away from home: on the host run `tailscale up --advertise-routes=192.168.68.0/24`, approve the route in the Tailscale admin console, and add Pi-hole as a Tailscale DNS nameserver restricted (split DNS) to `rackcellar.com`.
 
-Back up `vaultwarden/data` (SQLite; use `sqlite3 db.sqlite3 ".backup <dest>"`, not a plain copy) to a second disk and offsite.
+Backups: `vaultwarden-backup` writes a consistent `db-YYYY-MM-DD.sqlite3` snapshot daily (30 days kept) to `VAULTWARDEN_BACKUP_DIR` (default `./vaultwarden/backups`, same disk). Point it at another disk, and copy it offsite (e.g. `rclone` to B2/S3). To restore, stop `vaultwarden` and copy a snapshot over `vaultwarden/data/db.sqlite3`.
 
 ## Verifying the VPN
 
