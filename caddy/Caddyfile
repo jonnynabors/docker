@@ -1,61 +1,61 @@
 *.rackcellar.com {
-    # One wildcard cert via DNS-01 keeps hostnames out of public CT logs.
-    tls {
-        dns cloudflare {env.CF_API_TOKEN}
-        resolvers 1.1.1.1
-    }
+	# One wildcard cert via DNS-01 keeps hostnames out of public CT logs.
+	tls {
+		dns cloudflare {env.CF_API_TOKEN}
+		resolvers 1.1.1.1
+	}
 
-    @pihole host pihole.rackcellar.com
-    handle @pihole {
-        reverse_proxy pihole:80
-    }
+	@pihole host pihole.rackcellar.com
+	handle @pihole {
+		reverse_proxy pihole:80
+	}
 
-    @jellyfin host jellyfin.rackcellar.com
-    handle @jellyfin {
-        reverse_proxy gluetun:8096
-    }
+	@jellyfin host jellyfin.rackcellar.com
+	handle @jellyfin {
+		reverse_proxy gluetun:8096
+	}
 
-    @torrent host torrent.rackcellar.com
-    handle @torrent {
-        reverse_proxy gluetun:8112
-    }
+	@torrent host torrent.rackcellar.com
+	handle @torrent {
+		reverse_proxy gluetun:8112
+	}
 
-    @radarr host radarr.rackcellar.com
-    handle @radarr {
-        reverse_proxy gluetun:7878
-    }
+	@radarr host radarr.rackcellar.com
+	handle @radarr {
+		reverse_proxy gluetun:7878
+	}
 
-    @sonarr host sonarr.rackcellar.com
-    handle @sonarr {
-        reverse_proxy gluetun:8989
-    }
+	@sonarr host sonarr.rackcellar.com
+	handle @sonarr {
+		reverse_proxy gluetun:8989
+	}
 
-    @prowlarr host prowlarr.rackcellar.com
-    handle @prowlarr {
-        reverse_proxy gluetun:9696
-    }
+	@prowlarr host prowlarr.rackcellar.com
+	handle @prowlarr {
+		reverse_proxy gluetun:9696
+	}
 
-    @bazarr host bazarr.rackcellar.com
-    handle @bazarr {
-        reverse_proxy gluetun:6767
-    }
+	@bazarr host bazarr.rackcellar.com
+	handle @bazarr {
+		reverse_proxy gluetun:6767
+	}
 
-    @seerr host seerr.rackcellar.com
-    handle @seerr {
-        reverse_proxy seerr:5055
-    }
+	@seerr host seerr.rackcellar.com
+	handle @seerr {
+		reverse_proxy seerr:5055
+	}
 
-    @portainer host portainer.rackcellar.com
-    handle @portainer {
-        reverse_proxy portainer:9000
-    }
+	@portainer host portainer.rackcellar.com
+	handle @portainer {
+		reverse_proxy portainer:9000
+	}
 
-    @vault host vault.rackcellar.com
-    handle @vault {
-        reverse_proxy vaultwarden:80
-    }
+	@vault host vault.rackcellar.com
+	handle @vault {
+		reverse_proxy vaultwarden:80
+	}
 
-    handle {
-        abort
-    }
+	handle {
+		abort
+	}
 }
