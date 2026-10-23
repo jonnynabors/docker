@@ -98,6 +98,16 @@ Requires Docker Compose 2.17 or newer.
 
 Backups: `vaultwarden-backup` writes a consistent `db-YYYY-MM-DD.sqlite3` snapshot daily (30 days kept) to `VAULTWARDEN_BACKUP_DIR` (default `./vaultwarden/backups`, same disk). Point it at another disk, and copy it offsite (e.g. `rclone` to B2/S3). To restore, stop `vaultwarden` and copy a snapshot over `vaultwarden/data/db.sqlite3`.
 
+## Offsite backup
+
+`scripts/backup.sh` backs up configs (not media) to Cloudflare R2 with restic: `.env`, `media-stack/` (minus caches, `MediaCover`, Jellyfin metadata), Pi-hole `pihole.toml` and `gravity.db`, Vaultwarden data, and the daily Vaultwarden snapshots. It briefly stops the apps with live SQLite databases (Pi-hole keeps running), keeps 7 daily, 4 weekly and 6 monthly snapshots, and creates the repository on first run.
+
+1. Fill in the `R2_*` and `RESTIC_*` variables in `.env`. Keep `RESTIC_PASSWORD` somewhere off this machine; without it nothing can be restored.
+2. Run it once by hand: `./scripts/backup.sh`.
+3. Schedule it, for example `30 4 * * * cd ~/docker && ./scripts/backup.sh 2>&1 | logger -t homelab-backup` in `crontab -e`.
+
+Restore: `docker run --rm -it -e RESTIC_REPOSITORY -e RESTIC_PASSWORD -e AWS_ACCESS_KEY_ID=<key> -e AWS_SECRET_ACCESS_KEY=<secret> -e AWS_DEFAULT_REGION=auto -v /tmp/restore:/restore restic/restic:0.18.0 restore latest --target /restore`.
+
 ## Verifying the VPN
 
 Gluetun adds an iptables kill switch: its `OUTPUT` policy is `DROP`, and it only allows the Docker and LAN subnets (`FIREWALL_OUTBOUND_SUBNETS`), the Mullvad endpoint, and `tun0`. Containers using `network_mode: service:gluetun` share that namespace, so if the tunnel drops their traffic is blocked, not sent out over the normal connection.
