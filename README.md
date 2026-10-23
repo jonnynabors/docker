@@ -27,7 +27,7 @@ flowchart LR
     end
 
     LAN -- DNS --> pihole
-    LAN -- "*.home.arpa" --> caddy
+    LAN -- "*.rackcellar.com" --> caddy
     caddy --> pihole
     caddy --> seerr
     caddy --> portainer
@@ -37,17 +37,18 @@ flowchart LR
 
 ## Services
 
-| Service     | URL                          | Behind VPN |
-| ----------- | ---------------------------- | ---------- |
-| Pi-hole     | `pihole.home.arpa` (`:8080`) | no         |
-| Jellyfin    | `jellyfin.home.arpa`         | yes        |
-| qBittorrent | `torrent.home.arpa`          | yes        |
-| Radarr      | `radarr.home.arpa`           | yes        |
-| Sonarr      | `sonarr.home.arpa`           | yes        |
-| Prowlarr    | `prowlarr.home.arpa`         | yes        |
-| Bazarr      | `bazarr.home.arpa`           | yes        |
-| Seerr       | `seerr.home.arpa`            | no         |
-| Portainer   | `portainer.home.arpa`        | no         |
+| Service     | URL                              | Behind VPN |
+| ----------- | -------------------------------- | ---------- |
+| Pi-hole     | `pihole.rackcellar.com` (`:8080`) | no         |
+| Jellyfin    | `jellyfin.rackcellar.com`        | yes        |
+| qBittorrent | `torrent.rackcellar.com`         | yes        |
+| Radarr      | `radarr.rackcellar.com`          | yes        |
+| Sonarr      | `sonarr.rackcellar.com`          | yes        |
+| Prowlarr    | `prowlarr.rackcellar.com`        | yes        |
+| Bazarr      | `bazarr.rackcellar.com`          | yes        |
+| Seerr       | `seerr.rackcellar.com`           | no         |
+| Portainer   | `portainer.rackcellar.com`       | no         |
+| Vaultwarden | `vault.rackcellar.com`           | no         |
 
 Services behind the VPN use `network_mode: service:gluetun`, so their ports are published on `gluetun`. They restart with it (`depends_on` with `restart: true`).
 
@@ -74,14 +75,14 @@ Requires Docker Compose 2.17 or newer.
    docker compose up -d
    ```
 
-3. Point the router's DNS (or individual clients) at the host, and add a Pi-hole local DNS record for each `*.home.arpa` name pointing at the host IP.
+3. Point the router's DNS (or individual clients) at the host, and add a Pi-hole local DNS record for each `*.rackcellar.com` name pointing at the host IP.
 
 ## Layout
 
 | Path                                            | Purpose                                           |
 | ----------------------------------------------- | ------------------------------------------------- |
 | `docker-compose.yml`                            | All services                                      |
-| `caddy/Caddyfile`                               | Reverse proxy routes (`local_certs`, internal CA) |
+| `caddy/Caddyfile`                               | Reverse proxy routes (wildcard `*.rackcellar.com` cert) |
 | `media-stack/`, `pihole/etc-*`, `caddy/caddy_*` | Runtime state, git-ignored                        |
 | `.env`                                          | Secrets, git-ignored                              |
 
@@ -114,6 +115,6 @@ The two IPs must differ. DNS inside the namespace goes through gluetun's own res
 
 ## Notes
 
-- Caddy uses its internal CA; trust its root certificate (`caddy/caddy_data/caddy/pki/authorities/local/root.crt`) on clients to avoid browser warnings.
+- Caddy serves every `*.rackcellar.com` host with one wildcard Let's Encrypt cert (DNS-01 via Cloudflare); no client CA setup is needed. Unknown hosts are dropped.
 - Jellyfin reserves an Nvidia GPU; remove its `deploy` block on a host without one.
 - Image versions are pinned in `docker-compose.yml` and bumped by Renovate pull requests (`renovate.json`). Gluetun is pinned by digest because the deployed build is newer than the latest release tag.
