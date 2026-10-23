@@ -8,12 +8,16 @@ Single Docker Compose project (`homelab`) running DNS, a reverse proxy, and a VP
 flowchart LR
     LAN([LAN clients])
     Mullvad[(Mullvad WireGuard)]
+    R2[(Cloudflare R2)]
 
     subgraph host[Docker host]
         pihole[Pi-hole<br/>DNS :53, UI :8080]
         caddy[Caddy<br/>:80 / :443]
         seerr[Seerr :5055]
         portainer[Portainer :9000]
+        vault[Vaultwarden :80]
+        ersatztv[ErsatzTV :8409<br/>NVENC]
+        backup[restic backup<br/>nightly cron]
 
         subgraph vpn[gluetun network namespace]
             gluetun{{gluetun}}
@@ -31,6 +35,11 @@ flowchart LR
     caddy --> pihole
     caddy --> seerr
     caddy --> portainer
+    caddy --> vault
+    caddy --> ersatztv
+    jellyfin -- Live TV M3U/XMLTV --> ersatztv
+    ersatztv -- media source --> jellyfin
+    backup -- configs --> R2
     caddy -- via gluetun ports --> jellyfin & qbit & radarr & sonarr & prowlarr & bazarr
     gluetun == tunnel ==> Mullvad
 ```
