@@ -37,18 +37,18 @@ flowchart LR
 
 ## Services
 
-| Service     | URL                              | Behind VPN |
-| ----------- | -------------------------------- | ---------- |
+| Service     | URL                               | Behind VPN |
+| ----------- | --------------------------------- | ---------- |
 | Pi-hole     | `pihole.rackcellar.com` (`:8080`) | no         |
-| Jellyfin    | `jellyfin.rackcellar.com`        | yes        |
-| qBittorrent | `torrent.rackcellar.com`         | yes        |
-| Radarr      | `radarr.rackcellar.com`          | yes        |
-| Sonarr      | `sonarr.rackcellar.com`          | yes        |
-| Prowlarr    | `prowlarr.rackcellar.com`        | yes        |
-| Bazarr      | `bazarr.rackcellar.com`          | yes        |
-| Seerr       | `seerr.rackcellar.com`           | no         |
-| Portainer   | `portainer.rackcellar.com`       | no         |
-| Vaultwarden | `vault.rackcellar.com`           | no         |
+| Jellyfin    | `jellyfin.rackcellar.com`         | yes        |
+| qBittorrent | `torrent.rackcellar.com`          | yes        |
+| Radarr      | `radarr.rackcellar.com`           | yes        |
+| Sonarr      | `sonarr.rackcellar.com`           | yes        |
+| Prowlarr    | `prowlarr.rackcellar.com`         | yes        |
+| Bazarr      | `bazarr.rackcellar.com`           | yes        |
+| Seerr       | `seerr.rackcellar.com`            | no         |
+| Portainer   | `portainer.rackcellar.com`        | no         |
+| Vaultwarden | `vault.rackcellar.com`            | no         |
 
 Services behind the VPN use `network_mode: service:gluetun`, so their ports are published on `gluetun`. They restart with it (`depends_on` with `restart: true`).
 
@@ -79,12 +79,12 @@ Requires Docker Compose 2.17 or newer.
 
 ## Layout
 
-| Path                                            | Purpose                                           |
-| ----------------------------------------------- | ------------------------------------------------- |
-| `docker-compose.yml`                            | All services                                      |
+| Path                                            | Purpose                                                 |
+| ----------------------------------------------- | ------------------------------------------------------- |
+| `docker-compose.yml`                            | All services                                            |
 | `caddy/Caddyfile`                               | Reverse proxy routes (wildcard `*.rackcellar.com` cert) |
-| `media-stack/`, `pihole/etc-*`, `caddy/caddy_*` | Runtime state, git-ignored                        |
-| `.env`                                          | Secrets, git-ignored                              |
+| `media-stack/`, `pihole/etc-*`, `caddy/caddy_*` | Runtime state, git-ignored                              |
+| `.env`                                          | Secrets, git-ignored                                    |
 
 ## Vaultwarden
 
