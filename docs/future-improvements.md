@@ -4,13 +4,13 @@ Backlog of things worth doing, roughly in priority order.
 
 ## Backups
 
-All state lives on one disk (`media-stack/`, `pihole/etc-*`, `caddy/caddy_data`), so a disk failure loses every service's config and database.
+Configs and Vaultwarden data are backed up nightly to Cloudflare R2 by `scripts/backup.sh` (see the README). Remaining gaps:
 
-- Add a second drive, then back up with restic or Kopia on a schedule.
-- Back up configs and databases (Jellyfin, Radarr, Sonarr, Prowlarr, qBittorrent, Portainer, Pi-hole, Caddy data). The media library itself is optional.
-- Keep `.env` in a password manager, since it is git-ignored.
-- Include `caddy/caddy_data`, so the Caddy root CA survives a rebuild and devices don't need to trust a new one.
-- Consider an offsite copy (for example Backblaze B2 or Cloudflare R2). Vaultwarden snapshots already land in `VAULTWARDEN_BACKUP_DIR` daily but are not yet offsite.
+- The media library and downloads are not backed up (by choice; they are re-downloadable).
+- Nothing alerts if a nightly backup fails or stops running (see Monitoring).
+- Do a periodic test restore into a scratch directory.
+- Keep `RESTIC_PASSWORD` in a copy that does not live only on this machine.
+- Add a second drive for local redundancy once the ST6000NM0115 arrives.
 
 ## DNS redundancy
 
@@ -33,3 +33,5 @@ Caddy serves `*.rackcellar.com` with a wildcard Let's Encrypt cert (DNS-01 via C
 ## Monitoring
 
 - Uptime Kuma with ntfy for alerts when DNS, gluetun, or a service is down.
+- Backup monitoring: a Uptime Kuma push monitor that `scripts/backup.sh` pings on success, so a missed or failed nightly run alerts (heartbeat interval a bit over 24h).
+- Disk health: `smartd` (smartmontools) alerts for the refurbished ST3000DM001, which has a poor failure record, with ntfy or email notifications. Add the ST6000NM0115 when it is installed.
