@@ -49,8 +49,13 @@ flowchart LR
 | Seerr       | `seerr.rackcellar.com`            | no         |
 | Portainer   | `portainer.rackcellar.com`        | no         |
 | Vaultwarden | `vault.rackcellar.com`            | no         |
+| ErsatzTV    | `tv.rackcellar.com`               | no         |
 
 Services behind the VPN use `network_mode: service:gluetun`, so their ports are published on `gluetun`. They restart with it (`depends_on` with `restart: true`).
+
+### ErsatzTV
+
+Runs outside the VPN with NVENC on the GPU (shared with Jellyfin transcodes). Config lives in `media-stack/ersatztv` (included in the backup). In its UI: add the Jellyfin media source, then set hardware acceleration to NVENC in the FFmpeg profile. In Jellyfin, add a Live TV tuner (M3U) `http://ersatztv:8409/iptv/channels.m3u` and a guide provider (XMLTV) `http://ersatztv:8409/iptv/xmltv.xml`. Add a Pi-hole record for `tv.rackcellar.com`.
 
 ## Setup
 

@@ -50,6 +50,11 @@
 		reverse_proxy portainer:9000
 	}
 
+	@ersatztv host tv.rackcellar.com
+	handle @ersatztv {
+		reverse_proxy ersatztv:8409
+	}
+
 	@vault host vault.rackcellar.com
 	handle @vault {
 		reverse_proxy vaultwarden:80
