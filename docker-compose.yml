@@ -98,6 +98,19 @@ services:
     volumes:
       - ./media-stack/prowlarr:/config
 
+  # FlareSolverr-compatible Cloudflare solver; in the VPN netns so cookies match Prowlarr's egress IP.
+  # Prowlarr proxy URL: http://localhost:8191
+  byparr:
+    <<: *via-gluetun
+    image: ghcr.io/thephaseless/byparr:v3.0.4
+    container_name: byparr
+    environment:
+      TZ: America/Chicago
+    shm_size: 1gb
+    tmpfs:
+      - /tmp:exec,mode=1777,size=1G
+      - /cache:mode=1777,size=512M
+
   radarr:
     <<: *via-gluetun
     image: lscr.io/linuxserver/radarr:6.4.4

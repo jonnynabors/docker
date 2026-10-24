@@ -26,6 +26,7 @@ flowchart LR
             radarr[Radarr :7878]
             sonarr[Sonarr :8989]
             prowlarr[Prowlarr :9696]
+            byparr[Byparr :8191]
             bazarr[Bazarr :6767]
         end
     end
@@ -39,6 +40,7 @@ flowchart LR
     caddy --> ersatztv
     jellyfin -- Live TV M3U/XMLTV --> ersatztv
     ersatztv -- media source --> jellyfin
+    prowlarr -- Cloudflare proxy --> byparr
     backup -- configs --> R2
     caddy -- via gluetun ports --> jellyfin & qbit & radarr & sonarr & prowlarr & bazarr
     gluetun == tunnel ==> Mullvad
@@ -55,6 +57,7 @@ flowchart LR
 | Sonarr      | `sonarr.rackcellar.com`           | yes        |
 | Prowlarr    | `prowlarr.rackcellar.com`         | yes        |
 | Bazarr      | `bazarr.rackcellar.com`           | yes        |
+| Byparr      | internal only (`localhost:8191`)  | yes        |
 | Seerr       | `seerr.rackcellar.com`            | no         |
 | Portainer   | `portainer.rackcellar.com`        | no         |
 | Vaultwarden | `vault.rackcellar.com`            | no         |
