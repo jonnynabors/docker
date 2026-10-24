@@ -193,6 +193,28 @@ services:
               count: 1
               capabilities: [gpu]
 
+  # Evaluation alongside ErsatzTV; UI on host :8000 (no Caddy route yet), Jellyfin uses http://tunarr:8000.
+  tunarr:
+    <<: *common
+    image: chrisbenincasa/tunarr:latest
+    container_name: tunarr
+    environment:
+      TZ: America/Chicago
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility,video
+    volumes:
+      - ./media-stack/tunarr:/config/tunarr
+      - ${MEDIA_ROOT:-/mnt/storage}:/media:ro
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
   vaultwarden:
     <<: *common
     image: vaultwarden/server:1.37.4
