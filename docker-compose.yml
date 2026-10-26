@@ -193,7 +193,7 @@ services:
               count: 1
               capabilities: [gpu]
 
-  # Evaluation alongside ErsatzTV; UI on host :8000 (no Caddy route yet), Jellyfin uses http://tunarr:8000.
+  # Served at tv.rackcellar.com via Caddy; Jellyfin uses http://tunarr:8000.
   tunarr:
     <<: *common
     image: chrisbenincasa/tunarr:latest
