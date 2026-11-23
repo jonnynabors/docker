@@ -3,6 +3,12 @@ name: homelab
 x-common: &common
   restart: unless-stopped
 
+x-healthcheck: &healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 3
+  start_period: 60s
+
 x-lsio-env: &lsio-env
   PUID: "1000"
   PGID: "1000"
@@ -40,6 +46,9 @@ services:
     build: ./caddy
     image: homelab/caddy-cloudflare:2.11.7
     container_name: caddy
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:2019/config/"]
     environment:
       CF_API_TOKEN: ${CF_API_TOKEN:?set in .env}
     ports:
@@ -83,6 +92,9 @@ services:
     <<: *via-gluetun
     image: lscr.io/linuxserver/qbittorrent:5.3.0
     container_name: qbittorrent
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:8112/"]
     environment:
       <<: *lsio-env
       WEBUI_PORT: "8112"
@@ -94,6 +106,9 @@ services:
     <<: *via-gluetun
     image: lscr.io/linuxserver/prowlarr:2.6.5
     container_name: prowlarr
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:9696/ping"]
     environment: *lsio-env
     volumes:
       - ./media-stack/prowlarr:/config
@@ -114,6 +129,9 @@ services:
     <<: *via-gluetun
     image: lscr.io/linuxserver/radarr:6.4.4
     container_name: radarr
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:7878/ping"]
     environment: *lsio-env
     volumes:
       - ./media-stack/radarr:/config
@@ -124,6 +142,9 @@ services:
     <<: *via-gluetun
     image: lscr.io/linuxserver/sonarr:4.0.20
     container_name: sonarr
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:8989/ping"]
     environment: *lsio-env
     volumes:
       - ./media-stack/sonarr:/config
@@ -134,6 +155,9 @@ services:
     <<: *via-gluetun
     image: jellyfin/jellyfin:12.2
     container_name: jellyfin
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:8096/health"]
     environment: *lsio-env
     volumes:
       - ./media-stack/jellyfin:/config
@@ -150,6 +174,9 @@ services:
     <<: *via-gluetun
     image: lscr.io/linuxserver/bazarr:1.6.2
     container_name: bazarr
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:6767/"]
     environment: *lsio-env
     volumes:
       - ./media-stack/bazarr:/config
