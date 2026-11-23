@@ -13,6 +13,8 @@ set +a
 : "${R2_SECRET_ACCESS_KEY:?set in .env}"
 
 ROOT="$PWD"
+# renovate: datasource=docker depName=restic/restic
+RESTIC_VERSION="0.18.0"
 VW_BACKUPS="${VAULTWARDEN_BACKUP_DIR:-$ROOT/vaultwarden/backups}"
 # Apps with live SQLite databases; stopped briefly for a consistent copy. Pi-hole stays up (DNS).
 STOP=(sonarr radarr prowlarr bazarr seerr jellyfin qbittorrent ersatztv tunarr)
@@ -25,7 +27,7 @@ restic() {
     -e AWS_DEFAULT_REGION=auto \
     -v "$ROOT:/src:ro" \
     -v "$VW_BACKUPS:/vw-backups:ro" \
-    restic/restic:0.18.0 "$@"
+    restic/restic:"$RESTIC_VERSION" "$@"
 }
 
 restic snapshots >/dev/null 2>&1 || restic init
@@ -38,20 +40,19 @@ restic backup \
   --exclude '/src/media-stack/jellyfin/cache' \
   --exclude '/src/media-stack/jellyfin/transcodes' \
   --exclude '/src/media-stack/jellyfin/metadata' \
-  --exclude '/src/media-stack/ombi' \
   --exclude '/src/media-stack/gluetun' \
   --exclude '/src/media-stack/*/MediaCover' \
   --exclude '/src/media-stack/*/logs' \
   --exclude '/src/media-stack/*/Backups' \
   --exclude '/src/media-stack/tunarr/data.ms' \
   --exclude '/src/media-stack/tunarr/ms-snapshots' \
-  --exclude '/src/media-stack/portainer' \
   --exclude '/src/vaultwarden/data/db.sqlite3*' \
   --exclude '/src/vaultwarden/data/tmp' \
   /src/.env \
   /src/media-stack \
   /src/pihole/etc-pihole/pihole.toml \
   /src/pihole/etc-pihole/gravity.db \
+  /src/pihole/etc-dnsmasq.d \
   /src/vaultwarden/data \
   /vw-backups
 
