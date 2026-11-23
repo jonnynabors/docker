@@ -45,11 +45,6 @@
 		reverse_proxy seerr:5055
 	}
 
-	@portainer host portainer.rackcellar.com
-	handle @portainer {
-		reverse_proxy portainer:9000
-	}
-
 	@tunarr host tv.rackcellar.com
 	handle @tunarr {
 		reverse_proxy tunarr:8000

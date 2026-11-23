@@ -14,7 +14,6 @@ flowchart LR
         pihole[Pi-hole<br/>DNS :53, UI :8080]
         caddy[Caddy<br/>:80 / :443]
         seerr[Seerr :5055]
-        portainer[Portainer :9000]
         vault[Vaultwarden :80]
         ersatztv[ErsatzTV :8409<br/>NVENC]
         backup[restic backup<br/>nightly cron]
@@ -35,7 +34,6 @@ flowchart LR
     LAN -- "*.rackcellar.com" --> caddy
     caddy --> pihole
     caddy --> seerr
-    caddy --> portainer
     caddy --> vault
     caddy --> ersatztv
     jellyfin -- Live TV M3U/XMLTV --> ersatztv
@@ -59,7 +57,6 @@ flowchart LR
 | Bazarr      | `bazarr.rackcellar.com`           | yes        |
 | FlareSolverr | internal only (`localhost:8191`) | yes        |
 | Seerr       | `seerr.rackcellar.com`            | no         |
-| Portainer   | `portainer.rackcellar.com`        | no         |
 | Vaultwarden | `vault.rackcellar.com`            | no         |
 | ErsatzTV    | `tv.rackcellar.com`               | no         |
 

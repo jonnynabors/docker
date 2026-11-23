@@ -23,7 +23,6 @@ Caddy serves `*.rackcellar.com` with a wildcard Let's Encrypt cert (DNS-01 via C
 ## Identity and access
 
 - SSO with Authelia (or Authentik) in front of the *arr UIs, with OIDC for apps that support it.
-- Put Portainer behind `tecnativa/docker-socket-proxy`.
 
 ## Self-hosted replacements
 
