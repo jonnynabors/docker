@@ -41,6 +41,11 @@ restic backup \
   --exclude '/src/media-stack/ombi' \
   --exclude '/src/media-stack/gluetun' \
   --exclude '/src/media-stack/*/MediaCover' \
+  --exclude '/src/media-stack/*/logs' \
+  --exclude '/src/media-stack/*/Backups' \
+  --exclude '/src/media-stack/tunarr/data.ms' \
+  --exclude '/src/media-stack/tunarr/ms-snapshots' \
+  --exclude '/src/media-stack/portainer' \
   --exclude '/src/vaultwarden/data/db.sqlite3*' \
   --exclude '/src/vaultwarden/data/tmp' \
   /src/.env \
