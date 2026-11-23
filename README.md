@@ -15,7 +15,7 @@ flowchart LR
         caddy[Caddy<br/>:80 / :443]
         seerr[Seerr :5055]
         vault[Vaultwarden :80]
-        ersatztv[ErsatzTV :8409<br/>NVENC]
+        tunarr[Tunarr :8000<br/>NVENC]
         backup[restic backup<br/>nightly cron]
 
         subgraph vpn[gluetun network namespace]
@@ -35,9 +35,9 @@ flowchart LR
     caddy --> pihole
     caddy --> seerr
     caddy --> vault
-    caddy --> ersatztv
-    jellyfin -- Live TV M3U/XMLTV --> ersatztv
-    ersatztv -- media source --> jellyfin
+    caddy --> tunarr
+    jellyfin -- Live TV M3U/XMLTV --> tunarr
+    tunarr -- media source --> jellyfin
     prowlarr -- Cloudflare proxy --> flaresolverr
     backup -- configs --> R2
     caddy -- via gluetun ports --> jellyfin & qbit & radarr & sonarr & prowlarr & bazarr
@@ -58,13 +58,13 @@ flowchart LR
 | FlareSolverr | internal only (`localhost:8191`) | yes        |
 | Seerr       | `seerr.rackcellar.com`            | no         |
 | Vaultwarden | `vault.rackcellar.com`            | no         |
-| ErsatzTV    | `tv.rackcellar.com`               | no         |
+| Tunarr      | `tv.rackcellar.com`               | no         |
 
 Services behind the VPN use `network_mode: service:gluetun`, so their ports are published on `gluetun`. They restart with it (`depends_on` with `restart: true`).
 
-### ErsatzTV
+### Tunarr
 
-Runs outside the VPN with NVENC on the GPU (shared with Jellyfin transcodes). Config lives in `media-stack/ersatztv` (included in the backup). In its UI: add the Jellyfin media source, then set hardware acceleration to NVENC in the FFmpeg profile. In Jellyfin, add a Live TV tuner (M3U) `http://ersatztv:8409/iptv/channels.m3u` and a guide provider (XMLTV) `http://ersatztv:8409/iptv/xmltv.xml`. Add a Pi-hole record for `tv.rackcellar.com`.
+Runs outside the VPN with NVENC on the GPU (shared with Jellyfin transcodes). Config lives in `media-stack/tunarr` (included in the backup, minus the regenerable search index). In Jellyfin, add a Live TV tuner (M3U) and a guide provider (XMLTV) from Tunarr at `http://tunarr:8000`. Add a Pi-hole record for `tv.rackcellar.com`.
 
 ## Setup
 
@@ -110,11 +110,11 @@ Requires Docker Compose 2.17 or newer.
 4. Set `VAULTWARDEN_SIGNUPS_ALLOWED=true`, recreate `vaultwarden`, create your account, then remove it and recreate again.
 5. Away from home: on the host run `tailscale up --advertise-routes=192.168.68.0/24`, approve the route in the Tailscale admin console, and add Pi-hole as a Tailscale DNS nameserver restricted (split DNS) to `rackcellar.com`.
 
-Backups: `vaultwarden-backup` writes a consistent `db-YYYY-MM-DD.sqlite3` snapshot daily (30 days kept) to `VAULTWARDEN_BACKUP_DIR` (default `./vaultwarden/backups`, same disk). Point it at another disk, and copy it offsite (e.g. `rclone` to B2/S3). To restore, stop `vaultwarden` and copy a snapshot over `vaultwarden/data/db.sqlite3`.
+Backups: `vaultwarden-backup` writes a consistent `db-YYYY-MM-DD.sqlite3` snapshot daily (30 days kept) to `VAULTWARDEN_BACKUP_DIR` (default `./vaultwarden/backups`, same disk). Point it at another disk if you can; the offsite job below copies it to R2. To restore, stop `vaultwarden` and copy a snapshot over `vaultwarden/data/db.sqlite3`.
 
 ## Offsite backup
 
-`scripts/backup.sh` backs up configs (not media) to Cloudflare R2 with restic: `.env`, `media-stack/` (minus caches, `MediaCover`, Jellyfin metadata), Pi-hole `pihole.toml` and `gravity.db`, Vaultwarden data, and the daily Vaultwarden snapshots. It briefly stops the apps with live SQLite databases (Pi-hole keeps running), keeps 7 daily, 4 weekly and 6 monthly snapshots, and creates the repository on first run.
+`scripts/backup.sh` backs up configs (not media) to Cloudflare R2 with restic: `.env`, `media-stack/` (minus caches, logs, app `Backups`, `MediaCover`, the Tunarr search index, Jellyfin metadata), Pi-hole `pihole.toml`, `gravity.db` and `etc-dnsmasq.d`, Vaultwarden data, and the daily Vaultwarden snapshots. It briefly stops the apps with live SQLite databases (Pi-hole keeps running), keeps 7 daily, 4 weekly and 6 monthly snapshots, and creates the repository on first run.
 
 1. Fill in the `R2_*` and `RESTIC_*` variables in `.env`. Keep `RESTIC_PASSWORD` somewhere off this machine; without it nothing can be restored.
 2. Run it once by hand: `./scripts/backup.sh`.

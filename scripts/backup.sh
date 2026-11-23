@@ -17,7 +17,7 @@ ROOT="$PWD"
 RESTIC_VERSION="0.18.0"
 VW_BACKUPS="${VAULTWARDEN_BACKUP_DIR:-$ROOT/vaultwarden/backups}"
 # Apps with live SQLite databases; stopped briefly for a consistent copy. Pi-hole stays up (DNS).
-STOP=(sonarr radarr prowlarr bazarr seerr jellyfin qbittorrent ersatztv tunarr)
+STOP=(sonarr radarr prowlarr bazarr seerr jellyfin qbittorrent tunarr)
 
 restic() {
   docker run --rm \

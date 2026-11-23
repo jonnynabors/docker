@@ -197,29 +197,6 @@ services:
     ports:
       - "5055:5055"
 
-  # Live-TV channels from the Jellyfin library. Media paths must match Jellyfin's (/media).
-  # Jellyfin reaches it at http://ersatztv:8409 (shared Docker network), no host port needed.
-  ersatztv:
-    <<: *common
-    image: ghcr.io/ersatztv/legacy:v26.13.0
-    container_name: ersatztv
-    environment:
-      TZ: America/Chicago
-      NVIDIA_VISIBLE_DEVICES: all
-      NVIDIA_DRIVER_CAPABILITIES: compute,utility,video
-    volumes:
-      - ./media-stack/ersatztv:/config
-      - ${MEDIA_ROOT:-/mnt/storage}:/media:ro
-    tmpfs:
-      - /transcode
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-
   # Served at tv.rackcellar.com via Caddy; Jellyfin uses http://tunarr:8000.
   tunarr:
     <<: *common
