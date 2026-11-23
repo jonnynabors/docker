@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Generate BG2 reference notes with Gemini, one markdown file per topic.
 
-Usage: GEMINI_API_KEY=... scripts/bg2_knowledge.py [--grounded] [--force] [filter ...]
+Usage: GEMINI_API_KEY=... scripts/bg2_knowledge.py [--grounded] [--force] [--upload] [--no-generate] [filter ...]
 Output: knowledge/bg2/<slug>.md (existing files are skipped unless --force).
+--upload syncs knowledge/bg2 into the Open WebUI knowledge base (needs OPENWEBUI_API_KEY).
 """
 import argparse
 import json
@@ -15,6 +16,8 @@ import urllib.request
 from pathlib import Path
 
 MODEL = os.environ.get("GEMINI_MODEL", "gemini-flash-latest")
+WEBUI_URL = os.environ.get("OPENWEBUI_URL", "https://ai.rackcellar.com").rstrip("/")
+KB_NAME = "BG2"
 OUT = Path(__file__).resolve().parent.parent / "knowledge" / "bg2"
 DELAY_SECONDS = 8
 
@@ -99,23 +102,80 @@ def generate(topic, key, grounded):
     raise RuntimeError("retries exhausted")
 
 
+def webui(method, path, token, payload=None, raw=None, content_type="application/json"):
+    data = raw if raw is not None else (json.dumps(payload).encode() if payload is not None else None)
+    req = urllib.request.Request(
+        f"{WEBUI_URL}{path}", data=data, method=method,
+        headers={"Authorization": f"Bearer {token}", "Content-Type": content_type, "Accept": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            return json.load(resp)
+    except urllib.error.HTTPError as e:
+        raise RuntimeError(f"HTTP {e.code} from Open WebUI {path}: {e.read().decode()[:300]}") from None
+
+
+def upload_file(path, token):
+    boundary = "----bg2knowledge"
+    head = (f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="{path.name}"\r\n'
+            "Content-Type: text/markdown\r\n\r\n").encode()
+    body = head + path.read_bytes() + f"\r\n--{boundary}--\r\n".encode()
+    file_id = webui("POST", "/api/v1/files/", token, raw=body,
+                    content_type=f"multipart/form-data; boundary={boundary}")["id"]
+    for _ in range(60):
+        status = webui("GET", f"/api/v1/files/{file_id}/process/status", token).get("status")
+        if status == "completed":
+            return file_id
+        if status == "failed":
+            raise RuntimeError(f"processing failed for {path.name}")
+        time.sleep(2)
+    raise RuntimeError(f"timed out processing {path.name}")
+
+
+def sync_knowledge(token):
+    listing = webui("GET", "/api/v1/knowledge/", token)
+    items = listing.get("items", []) if isinstance(listing, dict) else listing
+    kb = next((k for k in items if k["name"] == KB_NAME), None)
+    if kb is None:
+        kb = webui("POST", "/api/v1/knowledge/create", token,
+                   {"name": KB_NAME, "description": "Baldur's Gate 2 notes"})
+    kb_id = kb["id"]
+    existing = {f["meta"]["name"]: f["id"] for f in webui("GET", f"/api/v1/knowledge/{kb_id}", token).get("files", [])}
+
+    files = sorted(OUT.glob("*.md"))
+    for i, path in enumerate(files, 1):
+        print(f"[{i}/{len(files)}] upload {path.name}")
+        try:
+            file_id = upload_file(path, token)
+            if path.name in existing:
+                webui("POST", f"/api/v1/knowledge/{kb_id}/file/remove", token, {"file_id": existing[path.name]})
+            webui("POST", f"/api/v1/knowledge/{kb_id}/file/add", token, {"file_id": file_id})
+        except RuntimeError as e:
+            print(f"  failed: {e}", file=sys.stderr)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("filter", nargs="*", help="only topics containing any of these words")
     ap.add_argument("--force", action="store_true", help="regenerate existing files")
     ap.add_argument("--grounded", action="store_true", help="use Google Search grounding")
+    ap.add_argument("--upload", action="store_true", help="sync knowledge/bg2 into Open WebUI")
+    ap.add_argument("--no-generate", action="store_true", help="skip Gemini, only upload")
     args = ap.parse_args()
 
     key = os.environ.get("GEMINI_API_KEY")
-    if not key:
+    if not key and not args.no_generate:
         sys.exit("GEMINI_API_KEY is not set")
+    token = os.environ.get("OPENWEBUI_API_KEY")
+    if args.upload and not token:
+        sys.exit("OPENWEBUI_API_KEY is not set")
 
     OUT.mkdir(parents=True, exist_ok=True)
     playthrough = OUT / "00-my-playthrough.md"
     if not playthrough.exists():
         playthrough.write_text(PLAYTHROUGH)
 
-    topics = [t for t in TOPICS if not args.filter or any(f.lower() in t.lower() for f in args.filter)]
+    topics = [] if args.no_generate else [t for t in TOPICS if not args.filter or any(f.lower() in t.lower() for f in args.filter)]
     for i, topic in enumerate(topics, 1):
         path = OUT / f"{slugify(topic)}.md"
         if path.exists() and not args.force:
@@ -127,6 +187,9 @@ def main():
         except (RuntimeError, KeyError, IndexError) as e:
             print(f"  failed: {e}", file=sys.stderr)
         time.sleep(DELAY_SECONDS)
+
+    if args.upload:
+        sync_knowledge(token)
 
 
 if __name__ == "__main__":
