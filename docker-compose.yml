@@ -27,7 +27,7 @@ services:
   # --- DNS + reverse proxy ---
   pihole:
     <<: *common
-    image: pihole/pihole:2026.10.0
+    image: pihole/pihole:2026.11.0
     container_name: pihole
     ports:
       - "53:53/tcp"
@@ -104,7 +104,7 @@ services:
 
   prowlarr:
     <<: *via-gluetun
-    image: lscr.io/linuxserver/prowlarr:2.6.5
+    image: lscr.io/linuxserver/prowlarr:2.7.0
     container_name: prowlarr
     healthcheck:
       <<: *healthcheck
@@ -153,7 +153,7 @@ services:
 
   jellyfin:
     <<: *via-gluetun
-    image: jellyfin/jellyfin:12.2
+    image: jellyfin/jellyfin:12.4
     container_name: jellyfin
     healthcheck:
       <<: *healthcheck
@@ -186,7 +186,7 @@ services:
   # Runs as uid 1000, so media-stack/seerr must be owned by 1000:1000
   seerr:
     <<: *common
-    image: ghcr.io/seerr-team/seerr:v3.5.1
+    image: ghcr.io/seerr-team/seerr:v3.5.2
     container_name: seerr
     init: true
     environment:
@@ -201,7 +201,7 @@ services:
   # Jellyfin reaches it at http://ersatztv:8409 (shared Docker network), no host port needed.
   ersatztv:
     <<: *common
-    image: ghcr.io/ersatztv/legacy:v26.11.4
+    image: ghcr.io/ersatztv/legacy:v26.13.0
     container_name: ersatztv
     environment:
       TZ: America/Chicago
@@ -244,7 +244,7 @@ services:
 
   vaultwarden:
     <<: *common
-    image: vaultwarden/server:1.37.4
+    image: vaultwarden/server:1.37.5
     container_name: vaultwarden
     environment:
       TZ: America/Chicago
@@ -257,7 +257,7 @@ services:
   # Daily consistent SQLite snapshot, 30 days retained. Needs rw on /data for WAL.
   vaultwarden-backup:
     <<: *common
-    image: alpine:3.22
+    image: alpine:3.24
     container_name: vaultwarden-backup
     depends_on:
       - vaultwarden
