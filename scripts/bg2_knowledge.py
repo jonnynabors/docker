@@ -145,7 +145,8 @@ def sync_knowledge(token):
         kb = webui("POST", "/api/v1/knowledge/create", token,
                    {"name": KB_NAME, "description": "Baldur's Gate 2 notes"})
     kb_id = kb["id"]
-    existing = {f["meta"]["name"]: f["id"] for f in webui("GET", f"/api/v1/knowledge/{kb_id}", token).get("files", [])}
+    detail = webui("GET", f"/api/v1/knowledge/{kb_id}", token)
+    existing = {f["meta"]["name"]: f["id"] for f in detail.get("files") or []}
 
     files = sorted(OUT.glob("*.md"))
     for i, path in enumerate(files, 1):
