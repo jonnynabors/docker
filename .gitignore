@@ -10,3 +10,6 @@ caddy/caddy_config/
 vaultwarden/
 ollama/
 open-webui/
+
+# Generated BG2 notes for Open WebUI
+knowledge/
