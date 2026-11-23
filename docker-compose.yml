@@ -200,7 +200,7 @@ services:
   # Served at tv.rackcellar.com via Caddy; Jellyfin uses http://tunarr:8000.
   tunarr:
     <<: *common
-    image: chrisbenincasa/tunarr:latest
+    image: chrisbenincasa/tunarr:2026.10.3
     container_name: tunarr
     environment:
       TZ: America/Chicago
