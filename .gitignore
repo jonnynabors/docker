@@ -8,3 +8,5 @@ pihole/etc-dnsmasq.d/
 caddy/caddy_data/
 caddy/caddy_config/
 vaultwarden/
+ollama/
+open-webui/

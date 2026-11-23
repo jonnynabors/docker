@@ -17,7 +17,7 @@ ROOT="$PWD"
 RESTIC_VERSION="0.18.0"
 VW_BACKUPS="${VAULTWARDEN_BACKUP_DIR:-$ROOT/vaultwarden/backups}"
 # Apps with live SQLite databases; stopped briefly for a consistent copy. Pi-hole stays up (DNS).
-STOP=(sonarr radarr prowlarr bazarr seerr jellyfin qbittorrent tunarr)
+STOP=(sonarr radarr prowlarr bazarr seerr jellyfin qbittorrent tunarr open-webui)
 
 restic() {
   docker run --rm \
@@ -54,6 +54,7 @@ restic backup \
   /src/pihole/etc-pihole/gravity.db \
   /src/pihole/etc-dnsmasq.d \
   /src/vaultwarden/data \
+  /src/open-webui \
   /vw-backups
 
 restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --prune

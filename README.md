@@ -15,6 +15,8 @@ flowchart LR
         caddy[Caddy<br/>:80 / :443]
         seerr[Seerr :5055]
         vault[Vaultwarden :80]
+        webui[Open WebUI :8080]
+        ollama[Ollama :11434<br/>GPU]
         tunarr[Tunarr :8000<br/>NVENC]
         backup[restic backup<br/>nightly cron]
 
@@ -35,6 +37,8 @@ flowchart LR
     caddy --> pihole
     caddy --> seerr
     caddy --> vault
+    caddy --> webui
+    webui --> ollama
     caddy --> tunarr
     jellyfin -- Live TV M3U/XMLTV --> tunarr
     tunarr -- media source --> jellyfin
@@ -58,6 +62,7 @@ flowchart LR
 | FlareSolverr | internal only (`localhost:8191`) | yes        |
 | Seerr       | `seerr.rackcellar.com`            | no         |
 | Vaultwarden | `vault.rackcellar.com`            | no         |
+| Open WebUI  | `ai.rackcellar.com`               | no         |
 | Tunarr      | `tv.rackcellar.com`               | no         |
 
 Services behind the VPN use `network_mode: service:gluetun`, so their ports are published on `gluetun`. They restart with it (`depends_on` with `restart: true`).
@@ -65,6 +70,24 @@ Services behind the VPN use `network_mode: service:gluetun`, so their ports are 
 ### Tunarr
 
 Runs outside the VPN with NVENC on the GPU (shared with Jellyfin transcodes). Config lives in `media-stack/tunarr` (included in the backup, minus the regenerable search index). In Jellyfin, add a Live TV tuner (M3U) and a guide provider (XMLTV) from Tunarr at `http://tunarr:8000`. Add a Pi-hole record for `tv.rackcellar.com`.
+
+### Local LLM (Open WebUI + Ollama)
+
+Ollama runs the model on the GPU and Open WebUI is the chat UI at `ai.rackcellar.com`. Chat history, assistants and knowledge bases live in `open-webui/` (included in the backup); downloaded models live in `ollama/` (not backed up).
+
+1. Add a Pi-hole local DNS record: `ai.rackcellar.com` -> host LAN IP.
+2. Start it: `docker compose up -d ollama open-webui`.
+3. Pull a chat model and the embedding model (8GB VRAM fits a 7B to 8B model):
+
+   ```sh
+   docker compose exec ollama ollama pull llama3.1:8b
+   docker compose exec ollama ollama pull nomic-embed-text
+   ```
+
+4. Set `OPENWEBUI_SIGNUPS_ALLOWED=true` in `.env`, recreate `open-webui`, create your account, then remove it and recreate again.
+5. In Open WebUI: Workspace > Knowledge to upload guides and notes, then Workspace > Models to create an assistant with a system prompt and the knowledge attached.
+
+`open-webui` is capped at 2GB RAM and Ollama unloads the model after 5 idle minutes so Jellyfin and Tunarr can use the GPU.
 
 ## Setup
 

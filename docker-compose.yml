@@ -251,3 +251,50 @@ services:
     volumes:
       - ./vaultwarden/data:/data
       - ${VAULTWARDEN_BACKUP_DIR:-./vaultwarden/backups}:/backups
+
+  # Local LLM. No host port; Open WebUI reaches it at http://ollama:11434.
+  # Pull models with: docker compose exec ollama ollama pull <model>
+  ollama:
+    <<: *common
+    image: ollama/ollama:0.40.17
+    container_name: ollama
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "ollama", "list"]
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      # Free VRAM for Jellyfin/Tunarr transcodes when idle; one model at a time (8GB card).
+      OLLAMA_KEEP_ALIVE: 5m
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_NUM_PARALLEL: "1"
+    volumes:
+      - ./ollama:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # Served at ai.rackcellar.com via Caddy. Chat history, assistants and knowledge live in ./open-webui.
+  open-webui:
+    <<: *common
+    image: ghcr.io/open-webui/open-webui:v0.13.4
+    container_name: open-webui
+    depends_on:
+      ollama:
+        condition: service_healthy
+    # Host has 8GB RAM shared with the whole stack.
+    mem_limit: 2g
+    environment:
+      TZ: America/Chicago
+      OLLAMA_BASE_URL: http://ollama:11434
+      # Embeddings run on Ollama (GPU) instead of in this container's RAM.
+      RAG_EMBEDDING_ENGINE: ollama
+      RAG_EMBEDDING_MODEL: nomic-embed-text
+      # Set true in .env only long enough to create your account
+      ENABLE_SIGNUP: ${OPENWEBUI_SIGNUPS_ALLOWED:-false}
+    volumes:
+      - ./open-webui:/app/backend/data
