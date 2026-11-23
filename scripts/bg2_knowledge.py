@@ -90,7 +90,7 @@ def generate(topic, key, grounded):
     )
     for attempt in range(5):
         try:
-            with urllib.request.urlopen(req, timeout=120) as resp:
+            with urllib.request.urlopen(req, timeout=300) as resp:
                 data = json.load(resp)
             parts = data["candidates"][0]["content"]["parts"]
             return "".join(p.get("text", "") for p in parts).strip()
@@ -99,6 +99,11 @@ def generate(topic, key, grounded):
                 time.sleep(30 * (attempt + 1))
                 continue
             raise RuntimeError(f"HTTP {e.code} from Gemini: {e.read().decode()[:300]}") from None
+        except (TimeoutError, urllib.error.URLError) as e:
+            if attempt < 4:
+                time.sleep(10)
+                continue
+            raise RuntimeError(f"network error talking to Gemini: {e}") from None
     raise RuntimeError("retries exhausted")
 
 
