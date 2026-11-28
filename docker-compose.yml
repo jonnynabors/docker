@@ -90,7 +90,7 @@ services:
 
   qbittorrent:
     <<: *via-gluetun
-    image: lscr.io/linuxserver/qbittorrent:5.3.0
+    image: lscr.io/linuxserver/qbittorrent:5.3.1
     container_name: qbittorrent
     healthcheck:
       <<: *healthcheck
@@ -200,7 +200,7 @@ services:
   # Served at tv.rackcellar.com via Caddy; Jellyfin uses http://tunarr:8000.
   tunarr:
     <<: *common
-    image: chrisbenincasa/tunarr:2026.10.3
+    image: chrisbenincasa/tunarr:2026.11.3
     container_name: tunarr
     environment:
       TZ: America/Chicago
@@ -256,7 +256,7 @@ services:
   # Pull models with: docker compose exec ollama ollama pull <model>
   ollama:
     <<: *common
-    image: ollama/ollama:0.40.17
+    image: ollama/ollama:0.40.19
     container_name: ollama
     healthcheck:
       <<: *healthcheck
@@ -281,7 +281,7 @@ services:
   # Served at ai.rackcellar.com via Caddy. Chat history, assistants and knowledge live in ./open-webui.
   open-webui:
     <<: *common
-    image: ghcr.io/open-webui/open-webui:v0.13.4
+    image: ghcr.io/open-webui/open-webui:v0.13.5
     container_name: open-webui
     depends_on:
       ollama:

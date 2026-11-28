@@ -14,7 +14,7 @@ set +a
 
 ROOT="$PWD"
 # renovate: datasource=docker depName=restic/restic
-RESTIC_VERSION="0.18.0"
+RESTIC_VERSION="0.20.0"
 VW_BACKUPS="${VAULTWARDEN_BACKUP_DIR:-$ROOT/vaultwarden/backups}"
 # Apps with live SQLite databases; stopped briefly for a consistent copy. Pi-hole stays up (DNS).
 STOP=(sonarr radarr prowlarr bazarr seerr jellyfin qbittorrent tunarr open-webui)
